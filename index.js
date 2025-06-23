@@ -52,13 +52,15 @@ const wss = new WebSocket.Server({ server: wssServer });
 wssServer.listen(8082, () => {
   console.log('WebSocket server running on ws://0.0.0.0:8082');
 });
-
+function heartbeat() {
+    this.isAlive = true;
+}
 wss.on('connection', (ws, req) => {
   const query = url.parse(req.url, true).query;
   const mac_address = query.mac_address;
   const idToken = query.idToken;
   const countNetworks = query.count;
-
+  ws.isAlive = true;
   console.log('New WS connection from:', req.connection.remoteAddress, 'Query:', query);
 
   if (!mac_address || !idToken || !countNetworks) {
@@ -86,3 +88,15 @@ wss.on('connection', (ws, req) => {
     console.error('WebSocket error:', error);
   });
 });
+const interval = setInterval(() => {
+    wss.clients.forEach((ws) => {
+        if (!ws.isAlive) {
+            console.log(`Terminating unresponsive connection: ${ws.mac_address}`);
+            if (ws.mac_address) updateOnlineStatus(ws.mac_address, false);
+            return ws.terminate();
+        }
+
+        ws.isAlive = false;
+        ws.ping();
+    });
+}, 30000); // каждые 30 секунд
