@@ -89,14 +89,23 @@ wss.on('connection', (ws, req) => {
   });
 });
 const interval = setInterval(() => {
-    wss.clients.forEach((ws) => {
-        if (!ws.isAlive) {
-            console.log(`Terminating unresponsive connection: ${ws.mac_address}`);
-            if (ws.mac_address) updateOnlineStatus(ws.mac_address, false);
-            return ws.terminate();
-        }
+  wss.clients.forEach((ws) => {
+    if (!ws.isAlive) {
+      console.log(`Terminating unresponsive connection: ${ws.mac_address}`);
+      ws.terminate();
 
-        ws.isAlive = false;
-        ws.ping();
-    });
-}, 30000); // каждые 30 секунд
+      if (ws.mac_address) {
+        const clients = count.get(ws.mac_address)?.filter(obj => obj.idToken !== ws.idToken) || [];
+        if (clients.length === 0) {
+          count.delete(ws.mac_address);
+        } else {
+          count.set(ws.mac_address, clients);
+        }
+      }
+      return;
+    }
+
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 30000);
