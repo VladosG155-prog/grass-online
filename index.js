@@ -63,6 +63,8 @@ wss.on('connection', (ws, req) => {
   ws.isAlive = true;
   console.log('New WS connection from:', req.connection.remoteAddress, 'Query:', query);
 
+  ws.on('pong', heartbeat);
+
   if (!mac_address || !idToken || !countNetworks) {
     ws.send(JSON.stringify({ type: 'error', message: 'mac_address, idToken, and count are required' }));
     ws.close();
