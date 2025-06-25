@@ -63,6 +63,7 @@ wss.on('connection', (ws, req) => {
   const idToken = query.idToken;
   const countNetworks = query.count;
   ws.isAlive = true;
+  ws.mac_address = mac_address
   console.log('New WS connection from:', req.connection.remoteAddress, 'Query:', query);
 
   ws.on('pong', heartbeat);
