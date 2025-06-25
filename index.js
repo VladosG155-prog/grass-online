@@ -53,6 +53,8 @@ wssServer.listen(8082, () => {
   console.log('WebSocket server running on ws://0.0.0.0:8082');
 });
 function heartbeat() {
+  console.log('@PONNGG');
+  
     this.isAlive = true;
 }
 wss.on('connection', (ws, req) => {
